@@ -1,15 +1,18 @@
+サーバー
+
 ```bash
 
-# cdをクローンしたディレクトリ(このディレクトリ)に合わせる
-
 cd server
-
 npm i
+./node_modules/.bin/ts-node index.ts
 
-docker-compose up -d
+```
+フロント
 
-node index.js
+```bash
 
-# 2って出てきたら成功
+cd front
+npm i
+npm run serve
 
 ```
