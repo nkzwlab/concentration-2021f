@@ -1,11 +1,23 @@
 import { Server, Socket } from "socket.io";
 import { shuffle } from "lodash";
+import * as express from "express";
 
-const io = new Server(3000, {
-  cors: {
+var app = express();
+var http = require('http').Server(app);
+
+app.use(express.static('../front/dist'));
+
+let io = require("socket.io")(http,{
+  cors:{
     origin: "http://localhost:8080",
-    methods: ["GET", "POST"],
-  },
+        methods: ["GET", "POST"],
+  }
+});
+
+
+
+http.listen(3000, function(){
+  console.log('server listening. Port:3000');
 });
 
 let turn = -1;
@@ -25,9 +37,9 @@ io.on("connection", (socket: ExtendedSocket) => {
     );
   });
   socket.on("start", () => {
+    turn = -1
     socket.broadcast.emit("start");
-    //cards = shuffle([...CARD_LIST]);
-    cards = CARD_LIST;
+    cards = shuffle([...CARD_LIST]);
     io.fetchSockets().then((sockets) => {
       sockets.forEach((socket) => {
         // @ts-ignore
@@ -45,6 +57,18 @@ io.on("connection", (socket: ExtendedSocket) => {
   socket.on("success", (index: number) => {
     socket.score++;
     calcFinish();
+    io.fetchSockets().then((sockets) => {
+      io.emit(
+        "namelist",
+        sockets.map((socket) =>
+          socket.id === sockets[turn].id
+            ? //@ts-ignore
+              `${socket.username} 点数:${socket.score}←`
+            : //@ts-ignore
+              `${socket.username} 点数:${socket.score}`
+        )
+      );
+    });
   });
 });
 
@@ -93,57 +117,57 @@ interface ExtendedSocket extends Socket {
 }
 
 const CARD_LIST = [
-  "CA",
-  "C2",
-  "C3",
-  "C4",
-  "C5",
-  "C6",
-  "C7",
-  "C8",
-  "C9",
-  "CT",
-  "CJ",
-  "CQ",
-  "CK",
-  "DA",
-  "D2",
-  "D3",
-  "D4",
-  "D5",
-  "D6",
-  "D7",
-  "D8",
-  "D9",
-  "DT",
-  "DJ",
-  "DQ",
-  "DK",
-  "HA",
-  "H2",
-  "H3",
-  "H4",
-  "H5",
-  "H6",
-  "H7",
-  "H8",
-  "H9",
-  "HT",
-  "HJ",
-  "HQ",
-  "HK",
-  "SA",
-  "S2",
-  "S3",
-  "S4",
-  "S5",
-  "S6",
-  "S7",
-  "S8",
-  "S9",
-  "ST",
-  "SJ",
-  "SQ",
-  "SK",
-  "JK",
+  "♣️A",
+  "♣️2",
+  "♣️3",
+  "♣️4",
+  "♣️5",
+  "♣️6",
+  "♣️7",
+  "♣️8",
+  "♣️9",
+  "♣️➓",
+  "♣️J",
+  "♣️Q",
+  "♣️K",
+  "♦️A",
+  "♦️2",
+  "♦️3",
+  "♦️4",
+  "♦️5",
+  "♦️6",
+  "♦️7",
+  "♦️8",
+  "♦️9",
+  "♦️➓",
+  "♦️J",
+  "♦️Q",
+  "♦️K",
+  "❤️A",
+  "❤️2",
+  "❤️3",
+  "❤️4",
+  "❤️5",
+  "❤️6",
+  "❤️7",
+  "❤️8",
+  "❤️9",
+  "❤️➓",
+  "❤️J",
+  "❤️Q",
+  "❤️K",
+  "♠️A",
+  "♠️2",
+  "♠️3",
+  "♠️4",
+  "♠️5",
+  "♠️6",
+  "♠️7",
+  "♠️8",
+  "♠️9",
+  "♠️➓",
+  "♠️J",
+  "♠️Q",
+  "♠️K",
+  "😈😈",
 ];
