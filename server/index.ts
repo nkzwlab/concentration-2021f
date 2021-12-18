@@ -56,7 +56,6 @@ io.on("connection", (socket: ExtendedSocket) => {
   });
   socket.on("success", (index: number) => {
     socket.score++;
-    calcFinish();
     io.fetchSockets().then((sockets) => {
       io.emit(
         "namelist",
@@ -69,6 +68,7 @@ io.on("connection", (socket: ExtendedSocket) => {
         )
       );
     });
+    calcFinish();
   });
 });
 

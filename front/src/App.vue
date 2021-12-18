@@ -2,7 +2,7 @@
   <div class="m-4" v-if="state === 'before-play'">
     <input
       v-model="name"
-      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline select-none"
     />
     <ul>
       <li v-for="name in namelist" :key="name">
@@ -81,6 +81,7 @@ socket.on("yourturn", () => {
 });
 socket.on("finish", () => {
   state.value = "result";
+  isMyTurn = false;
 });
 
 let stock: [string, number][] = [];
