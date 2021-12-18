@@ -26,8 +26,12 @@
     <div class="flex flex-wrap card-container">
       <div
         v-for="(card, index) in cards"
-        class="m-2 shadow-lg rounded cursor-pointer border-solid border-2 border-gray-300"
-        :class="{ cardbg: !card.mkr, 'opacity-0': card.hide }"
+        class="m-2 shadow-lg rounded border-solid border-2 border-gray-300"
+        :class="{
+          cardbg: !card.mkr,
+          'opacity-0': card.hide,
+          'cursor-pointer': !card.hide,
+        }"
         @click="mekuru(index)"
         style="height: 70px; width: 50px"
       >
@@ -60,7 +64,9 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { Card, State } from "../types/state";
 import { io } from "socket.io-client";
 
-const socket = io("ws://localhost:3000/");
+const socket = io(
+  process.env.NODE_ENV == "production" ? "/" : "ws://localhost:3000/"
+);
 let isMyTurn = false;
 socket.on("namelist", (_namelist: string[]) => {
   namelist.value = _namelist;
@@ -95,20 +101,19 @@ socket.on("mkr", (index: number, label: string) => {
       card.mkr = false;
     });
     _phase = 0;
-    if (stock[0][0].charAt(1) === stock[1][0].charAt(1)) {
-      socket.emit("success1");
+    if (stock[0][0].charAt(2) === stock[1][0].charAt(2)) {
       if (isMyTurn) {
         socket.emit("success");
       }
       cards[stock[0][1]].hide = true;
       cards[stock[1][1]].hide = true;
+    } else {
+      if (isMyTurn) {
+        socket.emit("nextTurn");
+        isMyTurn = false;
+      }
     }
     stock = [];
-
-    if (isMyTurn) {
-      socket.emit("nextTurn");
-      isMyTurn = false;
-    }
   }
 });
 
@@ -157,7 +162,7 @@ function resetCard(): void {
 let _phase = 0;
 
 function mekuru(index: number) {
-  if (isMyTurn && !cards[index].mkr && !cards[index].hide) {
+  if (isMyTurn && (!cards[index].mkr || _phase === 2) && !cards[index].hide) {
     socket.emit("mkr", index);
   }
 }
